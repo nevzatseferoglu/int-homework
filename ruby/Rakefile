@@ -54,4 +54,57 @@ namespace :db do
   task seed: :environment do
     Homework::App.instance.db_seed
   end
+
+  desc 'Check if the database is ready'
+  task check_ready: :environment do
+    ready = Homework::App.instance.db_ready
+    if ready
+      puts 'Database is ready.'
+    else
+      puts 'Database is not ready.'
+    end
+  end
+end
+
+desc 'Generate project documentation using YARD'
+task generate_docs: :environment do
+  if ENV['RACK_ENV'] == 'development'
+    require 'yard'
+
+    # Configure YARD using .yardopts file (if present)
+    YARD::CLI::Yardoc.run('--config', '.yardopts')
+  else
+    puts 'Documentation generation is only available in development environment.'
+  end
+end
+
+desc 'Run tests using RSpec and show all failures'
+task :test do
+  sh 'bundle exec rspec spec/ | awk "/^Failures:/,/^Failed examples:/"'
+end
+
+namespace :docker do
+  desc 'Stop and remove test db, ignore errors'
+  task :clean_db do
+    container_name_or_id = 'anynines-postgres-hw'
+    volume_name = 'a9shw'
+    ignore_error = '2>/dev/null'
+
+    puts 'Stopping container...'
+    system("docker stop #{container_name_or_id} #{ignore_error}")
+    puts 'Removing container...'
+    system("docker rm #{container_name_or_id} #{ignore_error}")
+    puts 'Removing volume...'
+    system("docker volume rm #{volume_name} #{ignore_error}")
+  end
+
+  desc 'Launch db instance inside docker'
+  task :start_db do
+    volume_name = 'a9shw'
+
+    puts 'Creating volume...'
+    system("docker volume create #{volume_name}")
+    puts 'Running docker-compose...'
+    system('docker-compose up -d')
+  end
 end
