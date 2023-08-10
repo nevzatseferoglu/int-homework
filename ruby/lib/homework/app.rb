@@ -78,6 +78,15 @@ class Homework::App
     generate_articles
   end
 
+  def db_ready
+    begin
+      db_connection.execute("SELECT 1")
+      true
+    rescue ActiveRecord::StatementInvalid => e
+      false
+    end
+  end
+
   protected
 
   def generate_authors

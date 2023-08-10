@@ -10,7 +10,7 @@ class Homework::API < Grape::API
   insert_after(
     Grape::Middleware::Formatter,
     Grape::Middleware::Logger,
-    logger: logger
+    logger:
   )
 
   prefix 'api'
@@ -20,7 +20,7 @@ class Homework::API < Grape::API
     if ENV['USERNAME'] == username && ENV['PASSWORD'] == password
       Homework.logger.info('Authorized')
     else
-      Homework.logger.info('Unauthorized')
+      error!({ error: 'Unauthorized' }, 401)
     end
   end
 

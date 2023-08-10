@@ -12,6 +12,8 @@ services:
     ports:
       - "5432:5432"
     restart: unless-stopped
+    stdin_open: true
+    tty: true
 volumes:
     a9shw:
       external: true
